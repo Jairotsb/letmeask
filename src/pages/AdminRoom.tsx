@@ -9,6 +9,8 @@ import { useHistory } from 'react-router-dom';
 import { useRoom } from '../hooks/useRoom';
 import { Question } from '../components/Question';
 import deleteImg from '../assets/images/delete.svg';
+import checkImg from '../assets/images/check.svg';
+import answerImg from '../assets/images/answer.svg';
 
 
 type RoomParams = {
@@ -32,9 +34,22 @@ export function AdminRoom() {
 
   async function handleEndRoom() {
     await database.ref(`rooms/${roomId}`).update({
-       endedAt: new Date()
+      endedAt: new Date()
     })
     history.push('/');
+  }
+
+  async function handleCheckQuestionAsAnswered(questionId: string) {
+    await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
+      isAnswered: true,
+    });
+
+  }
+
+  async function handleHighLightQuestion(questionId: string) {
+    await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
+      isHighlighted: true,
+    });
   }
 
   return (
@@ -64,13 +79,35 @@ export function AdminRoom() {
                 key={question.id}
                 content={question.content}
                 author={question.author}
+                isAnswered={question.isAnswered}
+                isHighlighted={question.isHighlighted}
               >
+                {!question.isAnswered && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Marcar Pergunta como respondida"
+                      onClick={() => handleHighLightQuestion(question.id)}
+                    >
+                      <img src={checkImg} alt="" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Dar destaque."
+                      onClick={() => handleCheckQuestionAsAnswered(question.id)}
+                    >
+                      <img src={answerImg} alt="" />
+                    </button>
+
+                  </>
+
+                )}
                 <button
                   type="button"
+                  aria-label="Deletar"
                   onClick={() => handleDeleteQuestion(question.id)}
                 >
                   <img src={deleteImg} alt="" />
-
                 </button>
 
               </Question>
